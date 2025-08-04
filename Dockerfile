@@ -1,12 +1,17 @@
-FROM alpine:latest
+FROM golang:1.22 as build
 
+WORKDIR /app
+COPY . .
+
+RUN go build -o pocketbase .
+
+FROM alpine:latest
 RUN apk --no-cache add ca-certificates
 
 WORKDIR /app
+COPY --from=build /app/pocketbase /app/pocketbase
 
-COPY pocketbase /app/pocketbase
 RUN chmod +x /app/pocketbase
 
 EXPOSE 8090
-
 ENTRYPOINT ["./pocketbase", "serve", "--http=0.0.0.0:8090"]
